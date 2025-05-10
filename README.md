@@ -17,8 +17,6 @@
 
 ![Снимок экрана (1036)](https://github.com/user-attachments/assets/f0907531-0f71-4482-bdc9-f31e684e2d2b)
 
-![Снимок экрана (1037)](https://github.com/user-attachments/assets/0f2b2e46-20e3-4d13-a551-71e5063089ef)
-
 ![Снимок экрана (1038)](https://github.com/user-attachments/assets/b5616cbc-0deb-4735-a9ba-c1ef58598f5c)
 
 ![Снимок экрана (1039)](https://github.com/user-attachments/assets/c96e66de-d67a-4214-a3e1-07685cfdb13e)
