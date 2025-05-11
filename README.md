@@ -32,15 +32,113 @@
  4. Настройте Keepalived так, чтобы он запускал данный скрипт каждые 3 секунды и переносил виртуальный IP на другой сервер, если bash-скрипт завершался с кодом, отличным от нуля (то есть порт веб-сервера был недоступен или отсутствовал index.html). Используйте для этого секцию vrrp_script
  5. На проверку отправьте получившейся bash-скрипт и конфигурационный файл keepalived, а также скриншот с демонстрацией переезда плавающего ip на другой сервер в случае недоступности порта или файла index.html
 
+## Ответ:
+
+keepalived.conf (master)
+
+```
+global_defs {
+    router_id LVS_DEVEL
+}
+
+vrrp_script chk_webserver {
+    script "/etc/keepalived/check_webserver.sh"
+    interval 2
+    weight -20
+    fall 2
+    rise 1
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface eth1
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        192.168.111.50
+    }
+    track_script {
+        chk_webserver
+    }
+}
+
+```
+
+keepalived.conf (backup)
+
+```
+global_defs {
+    router_id LVS_DEVEL
+}
+
+vrrp_script chk_webserver {
+    script "/etc/keepalived/check_webserver.sh"
+    interval 2
+    weight -20
+    fall 2
+    rise 1
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface eth1
+    virtual_router_id 51
+    priority 90
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        192.168.111.50
+    }
+    track_script {
+        chk_webserver
+    }
+}
+
+```
+
+check_webserver.sh
 
 
+```
+#!/bin/bash
 
+WEB_PORT=80
+WEB_ROOT="/var/www/html"
+INDEX_FILE="index.html"
 
+if ! nc -z localhost "$WEB_PORT"
+then
+  echo "Web server port $WEB_PORT is not accessible"
+  exit 1
+fi
 
+if [ ! -f "$WEB_ROOT/$INDEX_FILE" ]
+then
+  echo "File $WEB_ROOT/$INDEX_FILE does not exist"
+  exit 1
+fi
 
+exit 0
 
+```
 
+![Снимок экрана (1048)](https://github.com/user-attachments/assets/3ce4144a-a5c6-4b87-b4f9-402794ff1c71)
 
+![Снимок экрана (1049)](https://github.com/user-attachments/assets/563f79cc-2b9f-4c7a-8a38-b945a237b267)
+
+![Снимок экрана (1050)](https://github.com/user-attachments/assets/fffeda3f-fcb9-41fc-9285-445b8cf2fa19)
+
+![Снимок экрана (1051)](https://github.com/user-attachments/assets/13d57022-f381-453e-ae6f-3e5c68749366)
+
+![Снимок экрана (1052)](https://github.com/user-attachments/assets/156dcb21-7d8c-4ea8-ba71-5fc0f260eba0)
 
 
 
